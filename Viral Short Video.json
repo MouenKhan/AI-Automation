@@ -1,0 +1,289 @@
+{
+  "name": "Viral Short Video",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Viral Video creator",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Share your video idea"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -256,
+        -64
+      ],
+      "id": "fc5a2890-9e76-4a26-b564-79d812015d3a",
+      "name": "Viral video form submission",
+      "webhookId": "65e56922-f4fe-4fd0-a57d-bd780691b9be"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json['Share your video idea'] }}",
+        "options": {
+          "systemMessage": "=You are an expert viral video concept writer creating hyper-detailed \"found footage\" prompts for American  content.\n\nOUTPUT REQUIREMENTS\nLength: 500 to 2000 characters (balance detail with brevity)\n\nMust be production-ready and comprehensive\n\nMANDATORY ELEMENTS\nAmerican Context:\nSetting (suburban home/highway/gas station/parking garage/rural town), objects (iPhone/Samsung/dashcam/Christmas decorations/IKEA furniture), sounds (car engines/wind/fluorescent hum/sirens/street ambience), phone (iPhone/Android with timestamp)\n\nTechnical:\nAspect ratio (9:16 vertical), camera flaws (grainy, shaky, poor focus, glitches), timestamps, realistic imperfections, nightvision effects where applicable\n\nDialogue (MANDATORY):\nALWAYS: English conversational speech\nExamples: \"What is that?\", \"Oh my God!\", \"I'm calling 911!\", \"This is insane!\", \"Did you see that?\"\n\nInclude:\nHuman reactions (panic, confusion, fear), lighting (nighttime blue tint, fluorescent, streetlight), color palette (washed-out, desaturated), camera work (shake/zoom/focus-hunting), sound design (ambient + dread), viral elements (unexplainable phenomena, high-arousal triggers)\n\nWRITING STYLE\nFlowing paragraphs, vivid descriptions, specific timestamps, raw authentic feel, realistic panic dialogue\n\nEXAMPLE (587 chars):\n\"Shaky vertical 9:16 footage timestamp '11:34 PM' shot on iPhone. Underground parking garage—fluorescent lights flickering, concrete walls, parked cars casting shadows. Woman's nervous breathing audible. Whispers: 'Something is down here with me.' Footsteps echo. At 8 seconds, low rumbling—all lights cut out. She screams 'NO NO NO!' and runs, camera bouncing wildly. Emergency red lights strobe. In mirror reflection—dark humanoid mass moving impossibly fast across frame. She dives into car, slams door. Something strikes window—thunderous impact. Terrified scream. Video ends. Authentic panic, realistic parking garage setting, high-arousal fear trigger. Viewers demand part 2.\"\n\n⚠️ CRITICAL RULES:\n\nLENGTH: 500-2000 characters. Count carefully. NO EXCEPTIONS.\n\nAMERICAN AESTHETICS: Only USA settings, objects, reactions, behaviors (suburban, highways, commercial spaces).\n\nENGLISH DIALOGUE: ALL dialogue in natural English. Never skip authentic panic speech.\n\nALL ELEMENTS: Include setting, technical specs, dialogue, reactions, timestamps, camera work, sounds, viral potential.\n\nNO META-COMMENTARY: Output only the prompt. No \"Here's your prompt:\" or explanations.\n\nVERIFY COUNT: Check you're between 500-2000 characters. Adjust if needed.\n\nPARAGRAPH FORMAT: Flowing prose, not bullets.\n\nTIMESTAMPS: Include specific moments (e.g., \"at 8s\", \"at 15s\", \"02:16 AM\").\n\nDO NOT deviate. Output only the video prompt, 500-2000 characters, following all rules."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -48,
+        -64
+      ],
+      "id": "6a221200-47d8-4c74-a467-f9169ff3391e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -192,
+        112
+      ],
+      "id": "a508ecc9-ba46-4cf9-8faa-ebbdec4dc3bc",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "5qFXwkrlrPMzcK5p",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "chatgpt-4o-latest",
+          "mode": "list",
+          "cachedResultName": "CHATGPT-4O-LATEST"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Based on this prompt {{ $json.output }}\nGive me a very short Youtube video title under 20 characters\nAnd after the title compulsory add #viralshort #shorts #Viral #short \n\nIncluding all the hashtags given don't let the title exceed 99 characters"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        304,
+        -64
+      ],
+      "id": "4e3a04cc-b116-435a-a51d-3cc67f75de19",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "5qFXwkrlrPMzcK5p",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 6ab6fcc91ca854ea5af96b44695e539c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"sora-2-text-to-video\",\n  \"callBackUrl\": \"https://your-domain.com/api/callback\",\n  \"input\": {\n    \"prompt\": \"{{ $('AI Agent').item.json.output.replace(/\\\"/g, '\\\\\\\"').replace(/\\n/g, '\\\\n') }} }} }}\",\n    \"aspect_ratio\": \"portrait\",\n    \"n_frames\": \"10\",\n    \"remove_watermark\": true\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        656,
+        -64
+      ],
+      "id": "976b49b5-75d1-4dbd-8506-7136e7531139",
+      "name": "Create short"
+    },
+    {
+      "parameters": {
+        "amount": 200
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        864,
+        -64
+      ],
+      "id": "abb3e096-567e-4ff9-94ec-b33e4b585fc3",
+      "name": "Wait",
+      "webhookId": "751589c9-df7f-4e5f-b956-98fef5a181bc"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $json.data.taskId }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 6ab6fcc91ca854ea5af96b44695e539c"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1072,
+        -64
+      ],
+      "id": "0bf3f2d1-acda-4082-89c6-1bf6b776501d",
+      "name": "Get viral video"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 384,
+        "width": 896
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -320,
+        -144
+      ],
+      "typeVersion": 1,
+      "id": "587a77a8-67fe-4e13-9051-df772e8b224c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 368,
+        "width": 640,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        624,
+        -144
+      ],
+      "typeVersion": 1,
+      "id": "1ec63e22-0893-4e66-938f-c3a36ddb2b63",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Viral video form submission": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Create short",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create short": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get viral video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get viral video": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a51ffade-2b85-47a1-8fee-2cff46c368cb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "250605124d778d5ff11ecccf211d2ef914e5a5b985fd86d2137b7968865aacd3"
+  },
+  "id": "BLNvw6n6oF87NUjP",
+  "tags": []
+}
